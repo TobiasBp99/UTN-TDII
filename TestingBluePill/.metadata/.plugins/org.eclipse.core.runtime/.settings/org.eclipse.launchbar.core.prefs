@@ -1,0 +1,10 @@
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/name=Local
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=linux
+configDescList=org.eclipse.launchbar.core.descriptorType.default\:LedBlue Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:LedBlue Debug (1)
+eclipse.preferences.version=1
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:LedBlue\ Debug\ (1)/activeLaunchMode=debug
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:LedBlue\ Debug\ (1)/activeLaunchTarget=null\:---
+org.eclipse.launchbar.core.descriptorType.default\:LedBlue\ Debug\ (1)/activeLaunchMode=debug
+org.eclipse.launchbar.core.descriptorType.default\:LedBlue\ Debug/activeLaunchMode=run
+org.eclipse.launchbar.core.descriptorType.default\:LedBlue\ Debug/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local

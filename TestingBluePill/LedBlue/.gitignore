@@ -1,0 +1,16 @@
+#ignore Directories
+Debug/
+.settings/
+doc/html
+
+
+
+#ignore files
+*.cproject
+*.project
+*.launch
+*.mxproject
+
+doc/latex/*
+!doc/latex/refman.pdf
+
