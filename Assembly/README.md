@@ -2,13 +2,11 @@
 
 El objetivo será ir recopilando las tareas, entregas y trabajos prácticos de forma digitalizada para la materia __**Técnicas Digitales II**__ dictada en la __**Universidad Tecnológica Nacional F.R.B.A**__
 
-## TP 🧠
+## Funcionamiento 🚀
 
+El programa está implementado con la placa de desarrollo [BluePill](https://stm32-base.org/boards/STM32F103C8T6-Blue-Pill.html)
 
-
-## Apuntes 🚀
-1. 
-
+[Aquí](https://studio.youtube.com/video/F77Dk3ty5lo/edit) se puede encontrar un video del código en funcionamiento
 
 
 ## Autor ✒️

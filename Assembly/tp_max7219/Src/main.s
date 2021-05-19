@@ -116,7 +116,7 @@ main_loop:
 		/*	 LED ON de referencia	*/
 
 		/*	 LED OFF de referencia	*/
-		MOVS	R0,#1
+		MOVS	R0,#0
 		BL		led_set
 
 		//BL max_clean
