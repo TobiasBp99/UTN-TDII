@@ -87,16 +87,27 @@ void tarea_generar_estado_inicial(void *p) {
 		present[q] = (xor32() & 0xFF);
 
 	for (;;) {
-		xSemaphoreGive(sem_start);	// Aviso que ya se puede imprimir
+		xSemaphoreGive(sem_start);
 		if (xSemaphoreTake( sem_next, portMAX_DELAY) == pdTRUE) {
 			if (compare(present, future)) {
 				for (q = 0; q < 8; q++)
 					present[q] = (xor32() & 0xFF);
 			}
 		}
+
 		vTaskDelay(1 / portTICK_RATE_MS);
 	}
 }
+/*
+ * Por los semaforos me aseguro que:
+ * --> La 1° evolución ocurra luego de generar el numero aleatorio
+ * --> Evoluciono después de comparar
+ * --> Comparo después de evolucionar
+ *
+ * Con eso ya me alcanza porque cuando muero
+ * Lo último que hice fue comparar, ahí genero mi nuevo numero aleatorio
+ * Y evoluciono después de comparar
+ */
 void tarea_evolucionar_estado(void *p) {
 	uint8_t q = 0;
 	portTickType xLastWakeTime;
