@@ -14,7 +14,7 @@ El juego consta de un tablero rectangular, donde cada celda del mismo puede esta
 
 El concepto de celda vecina que vamos a utilizar es el siguiente. Son las 8 celdas que rodean a la celda a analizar. Todas las celdas van a tener 8 celdas vecinas, incluídas las de los bordes y los extremos que se van a cerrar sobre los otros bordes.
 
-<img src="/fotos/celdas.png" alt="My cool logo"/>
+<img src="./fotos/celdas.png" alt="My cool logo"/>
 
 [Aquí](https://youtu.be/1f65lHXS-TQ) se puede encontrar un video del código en funcionamiento
 
