@@ -1,0 +1,20 @@
+#ignore Directories
+Debug/
+.settings/
+doc/html
+.metadata/
+.vscode/
+
+
+
+
+#ignore files
+*.cproject
+*.project
+*.launch
+*.ld
+
+
+doc/latex/*
+!doc/latex/refman.pdf
+
