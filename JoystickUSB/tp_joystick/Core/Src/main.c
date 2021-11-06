@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "usbd_hid.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -34,9 +34,9 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define TICKS_ADC_MS		(50)
-#define TICKS_BUT_MS		(25)
 #define DELAY_ADC			(64)
 #define demora_software(X)	{for(int i=0; i<(X); i++){}}
+#define LEN_MUESTRAS	(4)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,12 +56,36 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
+void ADC_Select_CH0(void) {
+	/** Configure Regular Channel
+	 */
+	ADC_ChannelConfTypeDef sConfig = { 0 };
+	sConfig.Channel = ADC_CHANNEL_0;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+		Error_Handler();
+	}
+}
 
+void ADC_Select_CH1(void) {
+	/** Configure Regular Channel
+	 */
+	ADC_ChannelConfTypeDef sConfig = { 0 };
+	sConfig.Channel = ADC_CHANNEL_1;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+		Error_Handler();
+	}
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+uint16_t prom_ry = 0;
+uint16_t prom_rx = 0;
 /* USER CODE END 0 */
 
 /**
@@ -70,12 +94,12 @@ static void MX_ADC1_Init(void);
  */
 int main(void) {
 	/* USER CODE BEGIN 1 */
-	uint32_t ticks_adc;	//seran locales
-	uint32_t ticks_but;
-	uint16_t ry, rx;
-	uint8_t r3;
-	uint8_t s_r3 = 0;
-	int8_t q_deb = 0;
+	uint32_t ticks_adc;
+	uint16_t dato_ch0 = 0;
+	uint16_t dato_ch1 = 0;
+	uint8_t i = 0;
+	int8_t reporte[3];
+	int8_t rx, ry;
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -99,9 +123,7 @@ int main(void) {
 	MX_USB_DEVICE_Init();
 	MX_ADC1_Init();
 	/* USER CODE BEGIN 2 */
-	ticks_adc = HAL_GetTick();
-	ticks_but = HAL_GetTick();
-	HAL_ADCEx_Calibration_Start(&hadc1);
+
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -112,65 +134,48 @@ int main(void) {
 		/* USER CODE BEGIN 3 */
 		if ((HAL_GetTick() - ticks_adc) >= TICKS_ADC_MS) {
 			ticks_adc = HAL_GetTick();
+
+			ADC_Select_CH0();
 			HAL_ADC_Start(&hadc1);
-			HAL_ADC_PollForConversion(&hadc1, 10);
+			HAL_ADC_PollForConversion(&hadc1, 100);
 			demora_software(DELAY_ADC);
-			rx = HAL_ADC_GetValue(&hadc1);
-			HAL_ADC_PollForConversion(&hadc1, 10);
-			demora_software(DELAY_ADC);
-			ry = HAL_ADC_GetValue(&hadc1);
+			dato_ch0 += HAL_ADC_GetValue(&hadc1);
 			HAL_ADC_Stop(&hadc1);
+
+			ADC_Select_CH1();
+			HAL_ADC_Start(&hadc1);
+			HAL_ADC_PollForConversion(&hadc1, 100);
+			demora_software(DELAY_ADC);
+			dato_ch1 += HAL_ADC_GetValue(&hadc1);
+			HAL_ADC_Stop(&hadc1);
+
 			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+			i++;
+			if (i == LEN_MUESTRAS) {
+				prom_ry = dato_ch0 / LEN_MUESTRAS;
+				prom_rx = dato_ch1 / LEN_MUESTRAS;
+				dato_ch0 = 0;
+				dato_ch1 = 0;
 
-		}
-		if ((HAL_GetTick() - ticks_but) >= TICKS_BUT_MS) {
-			ticks_but = HAL_GetTick();
-			switch (s_r3) {
-			case 0:
-				if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2))
-					s_r3 = 1;
-				break;
+				ry = (prom_ry - 1970) * 62 / 1000; //Es el valor en reposo
+				rx = (prom_rx - 1970) * 62 / 1000; //Es el valor en reposo
 
-			case 1:
-				if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2))
-					q_deb++;
-				else
-					q_deb--;
-
-				if (q_deb == 10) {
-					q_deb = 0;
-					s_r3 = 2;
-					r3 ^= 0x01;
-				}
-				if (q_deb == -10) {
-					q_deb = 0;
-					s_r3 = 0;
-					r3 ^= 0x01;
-				}
-				break;
-
-			case 2:
-				if (!HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2)) {
-					q_deb--;
-				}
-				if (q_deb == -10) {
-					q_deb = 0;
-					s_r3 = 0;
-				}
-
-				break;
-			default:
-				s_r3 = 0;
-				r3 = 0;
-				q_deb = 0;
-				break;
-
+				reporte[0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2);
+				reporte[1] = rx;
+				reporte[2] = ry;
+				USBD_HID_SendReport(&hUsbDeviceFS, (uint8_t*) reporte, 3);
+//				HAL_Delay(10);
+//				reporte[0] = 0;
+//				reporte[1] = rx;
+//				reporte[2] = ry;
+//				USBD_HID_SendReport(&hUsbDeviceFS, (uint8_t*) reporte, 3);
+				i = 0;
 			}
 
-		}
 
-		//UNUSED(dato_ch0);
-		//UNUSED(dato_ch1);
+		}
+		UNUSED(dato_ch0);
+		UNUSED(dato_ch1);
 	}
 	/* USER CODE END 3 */
 }
@@ -247,18 +252,18 @@ static void MX_ADC1_Init(void) {
 	}
 	/** Configure Regular Channel
 	 */
-	sConfig.Channel = ADC_CHANNEL_0;
-	sConfig.Rank = ADC_REGULAR_RANK_1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
-		Error_Handler();
-	}
-	/** Configure Regular Channel
-	 */
-	sConfig.Rank = ADC_REGULAR_RANK_2;
-	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
-		Error_Handler();
-	}
+	/*sConfig.Channel = ADC_CHANNEL_0;
+	 sConfig.Rank = ADC_REGULAR_RANK_1;
+	 sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+	 if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+	 Error_Handler();
+	 }
+	 * Configure Regular Channel
+
+	 sConfig.Rank = ADC_REGULAR_RANK_2;
+	 if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+	 Error_Handler();
+	 }*/
 	/* USER CODE BEGIN ADC1_Init 2 */
 
 	/* USER CODE END ADC1_Init 2 */
@@ -287,12 +292,6 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-	/*Configure GPIO pin : PA2 */
-	GPIO_InitStruct.Pin = GPIO_PIN_2;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
 
