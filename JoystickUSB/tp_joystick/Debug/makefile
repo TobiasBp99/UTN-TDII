@@ -65,8 +65,8 @@ all: main-build
 main-build: tp_joystick.elf secondary-outputs
 
 # Tool invocations
-tp_joystick.elf: $(OBJS) $(USER_OBJS) C:\Users\toto_\STM32CubeIDE\workspace_1.7.0\tp_joystick\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "tp_joystick.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\toto_\STM32CubeIDE\workspace_1.7.0\tp_joystick\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tp_joystick.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+tp_joystick.elf: $(OBJS) $(USER_OBJS) C:\Users\toto_\tdii\JoystickUSB\tp_joystick\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "tp_joystick.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\toto_\tdii\JoystickUSB\tp_joystick\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tp_joystick.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
